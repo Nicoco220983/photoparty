@@ -1,0 +1,1 @@
+from .subapp import register_msa_subapp
