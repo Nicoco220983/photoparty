@@ -10,7 +10,8 @@ export class HTMLMsaPhotoPartyElement extends HTMLElement {
 
 	getMode(){
 		let mode = this.getAttribute("mode")
-		if(mode === "_url") mode = getUrlParam("mode")
+		if(mode === "_url") mode = getUrlParam("mode") || getUrlParam("m")
+		if(mode === "t") mode = "taker"
 		return mode || "home"
 	}
 
