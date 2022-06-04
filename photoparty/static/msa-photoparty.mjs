@@ -124,11 +124,11 @@ export class HTMLMsaPhotoPartyElement extends HTMLElement {
 		this.Q("div#home_wo_photo").style.display = (mode === "home" && !this.photo) ? "" : "none"
 		this.Q("div#home").style.display = (mode === "home" && this.photo) ? "" : "none"
 		this.Q("div#taker").style.display = (mode === "taker") ? "" : "none"
-		const qrcode_url_b64 = btoa(this.getQrcodeUrl())
-		fetchJson(`/msa/photoparty/url/${qrcode_url_b64}`).then(res => {
+		const qrcode_url = encodeUrl(this.getQrcodeUrl())
+		fetchJson(`/msa/photoparty/url/${qrcode_url}`).then(res => {
 			this.Qall(".url").forEach(u => u.textContent = res.url)
 		})
-		this.Qall("img.qrcode").forEach(i => i.src = `/msa/photoparty/qrcode/${qrcode_url_b64}`)
+		this.Qall("img.qrcode").forEach(i => i.src = `/msa/photoparty/qrcode/${qrcode_url}`)
 		this.Q("#delete").onclick = () => this.confirmDeleteCurrentPhoto()
 	}
 
@@ -216,4 +216,8 @@ async function fetchJson(url, args) {
 	const res = await fetch(url, args)
 	if(res.status < 300)
 		return await res.json()
+}
+
+function encodeUrl(url) {
+	return url.replaceAll('/','%S').replaceAll('?','%Q')
 }

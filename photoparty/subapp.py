@@ -50,14 +50,16 @@ class PhotoParty():
         class GetUrlRes(pyd.BaseModel):
             url: str
 
-        @subapp.get("/url/{url_b64}", response_model=GetUrlRes)
-        async def get_url(url_b64: str):
-            url = base64.b64decode(url_b64)
+        @subapp.get("/url/{url}", response_model=GetUrlRes)
+        async def get_url(url: str):
+            print("TMP url", url)
+            url = url.replace("%S","/").replace("%Q","?")
+            print("TMP url", url)
             return GetUrlRes(url=self.get_url(url))
 
-        @subapp.get("/qrcode/{url_b64}")
-        async def get_qrcode(url_b64: str):
-            url = base64.b64decode(url_b64)
+        @subapp.get("/qrcode/{url}")
+        async def get_qrcode(url: str):
+            url = url.replace("--","/")
             return Response(content=self.get_url_qrcode(url))
 
         class GetNextPhotoNameRes(pyd.BaseModel):
@@ -151,7 +153,8 @@ class PhotoParty():
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.connect(('8.8.8.8', 80))
             pub_ip = sock.getsockname()[0]
-            purl = purl._replace(netloc=f"{pub_ip}:{purl.port}")
+            netloc = f"{pub_ip}:{purl.port}" if purl.port else pub_ip
+            purl = purl._replace(netloc=netloc)
         return purl.geturl()
     
 
