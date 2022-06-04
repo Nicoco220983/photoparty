@@ -148,7 +148,10 @@ class PhotoParty():
     def get_url(self, url):
         purl = urllib.parse.urlparse(urllib.parse.unquote(url))
         if purl.hostname == "localhost" or purl.hostname == "127.0.0.1":
-            purl = purl._replace(netloc=f"{socket.gethostname()}:{purl.port}")
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.connect(('8.8.8.8', 80))
+            pub_ip = sock.getsockname()[0]
+            purl = purl._replace(netloc=f"{pub_ip}:{purl.port}")
         return purl.geturl()
     
 
