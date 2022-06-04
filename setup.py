@@ -14,6 +14,7 @@ setup(
         'fastapi',
         'aiofiles',
         'python-multipart',
+        'Pillow',
         'qrcode[pil]',
     ],
 )

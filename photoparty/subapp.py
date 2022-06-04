@@ -6,8 +6,7 @@ import functools
 import urllib.parse
 import socket
 import base64
-
-import qrcode
+import asyncio
 
 from fastapi import FastAPI, Request, Depends, File, UploadFile, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -16,8 +15,15 @@ from fastapi.responses import FileResponse, Response
 import pydantic as pyd
 import aiofiles
 
+import PIL.Image
+import qrcode
+
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 STATIC_DIR = os.path.join(HERE, "static")
+
+PHOTOPARTY_DIR = os.getenv("PHOTOPARTY_DIR")
+PHOTOPARTY_MAXSIZE = int(os.getenv("PHOTOPARTY_MAXSIZE", 1024))
 
 
 async def register_msa_subapp(app):
@@ -30,6 +36,7 @@ class PhotoParty():
         self.init_photos_dir()
         self.photonames = set(self.list_photonames())
         self.new_photonames = []
+        self.loop = asyncio.get_running_loop()
 
 
     def register_msa_subapp(self, app):
@@ -67,9 +74,9 @@ class PhotoParty():
         async def upload_photo(photos: List[UploadFile]):
             for photo in photos:
                 fname = self.gen_new_filename(photo.filename)
+                await self.write_file(photo, fname)
                 self.photonames.add(fname)
                 self.new_photonames.append(fname)
-                await self.write_file(photo, fname)
         
         @subapp.delete("/_photo/{pname}")
         async def delete_photo(pname: str):
@@ -77,7 +84,7 @@ class PhotoParty():
     
 
     def get_photos_dirpath(self):
-        return os.getenv("PHOTOPARTY_DIR", os.path.join(HERE, "_photos"))
+        return PHOTOPARTY_DIR or os.path.join(HERE, "_photos")
     
 
     def init_photos_dir(self):
@@ -122,11 +129,14 @@ class PhotoParty():
     
 
     async def write_file(self, in_file, out_fname):
-        # TODO: compression
         out_fpath = os.path.join(self.get_photos_dirpath(), out_fname)
-        async with aiofiles.open(out_fpath, 'wb') as out_file:
-            content = await in_file.read()
-            await out_file.write(content)
+        content = await in_file.read()
+        def _write_file():
+            img = PIL.Image.open(io.BytesIO(content))
+            if max(img.size) > PHOTOPARTY_MAXSIZE:
+                img.thumbnail((PHOTOPARTY_MAXSIZE, PHOTOPARTY_MAXSIZE), PIL.Image.ANTIALIAS)
+            img.save(out_fpath, "JPEG")
+        await self.loop.run_in_executor(None, _write_file)
     
 
     async def remove_file(self, fname):
