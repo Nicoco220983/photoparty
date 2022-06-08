@@ -1,16 +1,11 @@
-import os
-
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from starlette.responses import FileResponse
+from starlette.responses import HTMLResponse
 
 import photoparty
 
 MSA_PACKAGES = [
     photoparty
 ]
-
-HERE = os.path.abspath(os.path.dirname(__file__))
 
 app = FastAPI()
 
@@ -22,9 +17,23 @@ async def startup_event():
             await pkg.register_msa_subapp(app)
 
 
-STATIC_DIR = os.path.join(HERE, "static")
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-@app.get("/")
-async def root():
-    return FileResponse(os.path.join(HERE, "static/index.html"))
+@app.get("/", response_class=HTMLResponse)
+async def msapage():
+    page = await photoparty.msa_get_as_page()
+    return f"""<html>
+<head>
+    <title>photoparty</title>
+    <style>
+        html, body {{
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }}
+    </style>
+    {page.get('head', '')}
+</head>
+<body>
+    {page.get('body', '')}
+</body>
+</html>"""

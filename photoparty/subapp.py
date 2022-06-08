@@ -30,6 +30,13 @@ async def register_msa_subapp(app):
     PhotoParty().register_msa_subapp(app)
 
 
+async def msa_get_as_page():
+    return {
+        "head": '<script type="module" src="/msa/photoparty/static/msa-photoparty.mjs"></script>',
+        "body": '<msa-photoparty mode="_url" style="width:100%; height:100%; padding:0; margin:0"></msa-photoparty>',
+    }
+
+
 class PhotoParty():
 
     def __init__(self):
@@ -52,9 +59,7 @@ class PhotoParty():
 
         @subapp.get("/url/{url}", response_model=GetUrlRes)
         async def get_url(url: str):
-            print("TMP url", url)
             url = url.replace("%S","/").replace("%Q","?")
-            print("TMP url", url)
             return GetUrlRes(url=self.get_url(url))
 
         @subapp.get("/qrcode/{url}")
