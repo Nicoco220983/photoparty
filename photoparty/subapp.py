@@ -26,8 +26,8 @@ PHOTOPARTY_DIR = os.getenv("PHOTOPARTY_DIR")
 PHOTOPARTY_MAXSIZE = int(os.getenv("PHOTOPARTY_MAXSIZE", 1024))
 
 
-async def register_msa_subapp(app):
-    PhotoParty().register_msa_subapp(app)
+async def msa_register_subapp(app):
+    PhotoParty().msa_register_subapp(app)
 
 
 async def msa_get_as_page():
@@ -46,7 +46,7 @@ class PhotoParty():
         self.loop = asyncio.get_running_loop()
 
 
-    def register_msa_subapp(self, app):
+    def msa_register_subapp(self, app):
 
         subapp = FastAPI()
         app.mount("/msa/photoparty", subapp)

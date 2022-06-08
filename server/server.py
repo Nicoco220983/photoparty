@@ -13,8 +13,8 @@ app = FastAPI()
 @app.on_event("startup")
 async def startup_event():
     for pkg in MSA_PACKAGES:
-        if hasattr(pkg, "register_msa_subapp"):
-            await pkg.register_msa_subapp(app)
+        if hasattr(pkg, "msa_register_subapp"):
+            await pkg.msa_register_subapp(app)
 
 
 @app.get("/", response_class=HTMLResponse)

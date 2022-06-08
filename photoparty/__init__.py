@@ -1,1 +1,1 @@
-from .subapp import register_msa_subapp, msa_get_as_page
+from .subapp import msa_register_subapp, msa_get_as_page
