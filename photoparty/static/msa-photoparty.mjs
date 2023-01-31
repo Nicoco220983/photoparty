@@ -136,7 +136,8 @@ export class HTMLMsaPhotoPartyElement extends HTMLElement {
 	getQrcodeUrl(){
 		const url = new URL(window.location.href)
 		const searchParams = url.searchParams
-		searchParams.set('mode', 'taker')
+		searchParams.set('m', 't')
+		searchParams.delete('mode')
 		url.search = searchParams.toString()
 		return url.toString()
 	}

@@ -64,7 +64,7 @@ class PhotoParty():
 
         @subapp.get("/qrcode/{url}")
         async def get_qrcode(url: str):
-            url = url.replace("--","/")
+            url = url.replace("%S","/").replace("%Q","?")
             return Response(content=self.get_url_qrcode(url))
 
         class GetNextPhotoNameRes(pyd.BaseModel):
